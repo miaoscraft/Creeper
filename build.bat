@@ -16,8 +16,8 @@ echo Building app.dll
 go build -buildmode=c-shared -o app.dll
 IF ERRORLEVEL 1 pause
 
-:: Copy app.dll amd app.json
-:: SET DevDir=D:\¿áQ Pro\dev\me.cqp.tnze.demo
+::Copy app.dll amd app.json
+SET DevDir=f:\CoolQ Air\dev\cn.miaoscraft.creeper
 if defined DevDir (
     echo Coping files
     for %%f in (app.dll,app.json) do move %%f "%DevDir%\%%f" > nul
