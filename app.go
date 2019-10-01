@@ -1,9 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+)
+
+var (
+	group    []int64
+	lyricsNO []int
 )
 
 //go:generate cqcfg -c .
@@ -15,30 +21,71 @@ func main() { /*此处应当留空*/ }
 
 func init() {
 	cqp.AppID = "cn.miaoscraft.creeper" // TODO: 修改为这个插件的ID
-	cqp.PrivateMsg = onPrivateMsg
 	cqp.GroupMsg = onGroupMsg
 }
 
-func onPrivateMsg(subType, msgID int32, fromQQ int64, msg string, font int32) int32 {
-	if latter := getnext(msg); latter != "" {
-		cqp.SendPrivateMsg(fromQQ, latter)
-	}
-	return 0
-}
-
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
-	if latter := getnext(msg); latter != "" {
+	if latter := getnext(strings.ToLower(msg), fromGroup); latter != "" {
 		cqp.SendGroupMsg(fromGroup, latter)
 	}
 	return 0
 }
 
-func getnext(former string) string {
-	for i := 0; i < len(lyrics)-1; i++ {
-		if strings.ToLower(former) == strings.ToLower(lyrics[i]) {
-			cqp.AddLog(cqp.Info, "Creeper", lyrics[i+1])
-			return lyrics[i+1]
+func getnext(former string, fromGroup int64) string {
+	var i = 0
+	//判断群是否有接龙记录
+	if len(group) != 0 {
+		for i = 0; i < len(group); i++ {
+			if group[i] == fromGroup {
+				break
+			}
+			i++
 		}
+		if i == len(group) {
+			group = append(group, fromGroup)
+			lyricsNO = append(lyricsNO, 0)
+		}
+	} else {
+		group = append(group, fromGroup)
+		lyricsNO = append(lyricsNO, 0)
+	}
+	cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("i=%d", i))
+	//接不上来的时候可以复读让机器人接下一句
+	if former == strings.ToLower(lyrics[lyricsNO[i]]) {
+		cqp.AddLog(cqp.Info, "Creeper", "群员复读")
+		lyricsNO[i]++
+		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
+		if lyricsNO[i] == len(lyrics)-1 {
+			defer func() {
+				lyricsNO[i] = 0
+				i = 0
+			}()
+		}
+		return lyrics[lyricsNO[i]]
+	}
+	//正常接龙
+	if former == strings.ToLower(lyrics[lyricsNO[i]+1]) {
+		cqp.AddLog(cqp.Info, "Creeper", "群员接龙")
+		lyricsNO[i] += 2
+		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
+		//群友接龙到末尾，重新初始化到第一句
+		if lyricsNO[i] >= len(lyrics) {
+			lyricsNO[i] = 0
+			return ""
+		}
+		//机器人接龙到最后一个时重新初始化到第一句
+		if lyricsNO[i] == len(lyrics)-1 {
+			defer func() {
+				lyricsNO[i] = 0
+			}()
+		}
+		return lyrics[lyricsNO[i]]
+	}
+	//重置接龙
+	if former == strings.ToLower(lyrics[0]) {
+		cqp.AddLog(cqp.Info, "Creeper", "重置接龙")
+		lyricsNO[i] = 1
+		return lyrics[1]
 	}
 	return ""
 }
