@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"strings"
-
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 )
 
@@ -49,12 +47,12 @@ func getnext(former string, fromGroup int64) string {
 		group = append(group, fromGroup)
 		lyricsNO = append(lyricsNO, 0)
 	}
-	cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("i=%d", i))
+	//	cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("i=%d", i))
 	//接不上来的时候可以复读让机器人接下一句
 	if former == strings.ToLower(lyrics[lyricsNO[i]]) {
 		cqp.AddLog(cqp.Info, "Creeper", "群员复读")
 		lyricsNO[i]++
-		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
+		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		if lyricsNO[i] == len(lyrics)-1 {
 			defer func() {
 				lyricsNO[i] = 0
@@ -65,9 +63,9 @@ func getnext(former string, fromGroup int64) string {
 	}
 	//正常接龙
 	if former == strings.ToLower(lyrics[lyricsNO[i]+1]) {
-		cqp.AddLog(cqp.Info, "Creeper", "群员接龙")
+		//		cqp.AddLog(cqp.Info, "Creeper", "群员接龙")
 		lyricsNO[i] += 2
-		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
+		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		//群友接龙到末尾，重新初始化到第一句
 		if lyricsNO[i] >= len(lyrics) {
 			lyricsNO[i] = 0
@@ -83,7 +81,7 @@ func getnext(former string, fromGroup int64) string {
 	}
 	//重置接龙
 	if former == strings.ToLower(lyrics[0]) {
-		cqp.AddLog(cqp.Info, "Creeper", "重置接龙")
+		//		cqp.AddLog(cqp.Info, "Creeper", "重置接龙")
 		lyricsNO[i] = 1
 		return lyrics[1]
 	}
