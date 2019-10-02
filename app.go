@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"runtime/debug"
 	"strings"
+
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 )
 
@@ -23,34 +26,36 @@ func init() {
 }
 
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+	defer talisman()
 	if latter := getnext(strings.ToLower(msg), fromGroup); latter != "" {
 		cqp.SendGroupMsg(fromGroup, latter)
 	}
 	return 0
 }
 
+//msc护符
+func talisman() {
+	if r := recover(); r != nil {
+		cqp.AddLog(cqp.Fatal, "Creeper", fmt.Sprintf("%v\n\n%s", r, debug.Stack()))
+	}
+}
+
 func getnext(former string, fromGroup int64) string {
 	var i = 0
 	//判断群是否有接龙记录
-	if len(group) != 0 {
-		for i = 0; i < len(group); i++ {
-			if group[i] == fromGroup {
-				break
-			}
-			i++
+	for i = 0; i < len(group); i++ {
+		if group[i] == fromGroup {
+			break
 		}
-		if i == len(group) {
-			group = append(group, fromGroup)
-			lyricsNO = append(lyricsNO, 0)
-		}
-	} else {
+	}
+	if i >= len(group) {
 		group = append(group, fromGroup)
 		lyricsNO = append(lyricsNO, 0)
+		cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("添加群:%d", group[i]))
 	}
-	//	cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("i=%d", i))
 	//接不上来的时候可以复读让机器人接下一句
 	if former == strings.ToLower(lyrics[lyricsNO[i]]) {
-		cqp.AddLog(cqp.Info, "Creeper", "群员复读")
+		//cqp.AddLog(cqp.Info, "Creeper", "群员复读")
 		lyricsNO[i]++
 		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		if lyricsNO[i] == len(lyrics)-1 {
