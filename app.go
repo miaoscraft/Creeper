@@ -8,10 +8,7 @@ import (
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 )
 
-var (
-	group    []int64
-	lyricsNO []int
-)
+var lyricsNO map[int64]int = make(map[int64]int)
 
 //go:generate cqcfg -c .
 // cqp: 名称: Creeper
@@ -41,53 +38,40 @@ func talisman() {
 }
 
 func getnext(former string, fromGroup int64) string {
-	var i = 0
-	//判断群是否有接龙记录
-	for i = 0; i < len(group); i++ {
-		if group[i] == fromGroup {
-			break
-		}
-	}
-	if i >= len(group) {
-		group = append(group, fromGroup)
-		lyricsNO = append(lyricsNO, 0)
-		cqp.AddLog(cqp.Info, "Creeper", fmt.Sprintf("添加群:%d", group[i]))
-	}
 	//接不上来的时候可以复读让机器人接下一句
-	if former == strings.ToLower(lyrics[lyricsNO[i]]) {
+	if former == strings.ToLower(lyrics[lyricsNO[fromGroup]]) {
 		//cqp.AddLog(cqp.Info, "Creeper", "群员复读")
-		lyricsNO[i]++
-		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
-		if lyricsNO[i] == len(lyrics)-1 {
+		lyricsNO[fromGroup]++
+		//cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
+		if lyricsNO[fromGroup] == len(lyrics)-1 {
 			defer func() {
-				lyricsNO[i] = 0
-				i = 0
+				lyricsNO[fromGroup] = 0
 			}()
 		}
-		return lyrics[lyricsNO[i]]
+		return lyrics[lyricsNO[fromGroup]]
 	}
 	//正常接龙
-	if former == strings.ToLower(lyrics[lyricsNO[i]+1]) {
+	if former == strings.ToLower(lyrics[lyricsNO[fromGroup]+1]) {
 		//		cqp.AddLog(cqp.Info, "Creeper", "群员接龙")
-		lyricsNO[i] += 2
+		lyricsNO[fromGroup] += 2
 		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		//群友接龙到末尾，重新初始化到第一句
-		if lyricsNO[i] >= len(lyrics) {
-			lyricsNO[i] = 0
+		if lyricsNO[fromGroup] >= len(lyrics) {
+			lyricsNO[fromGroup] = 0
 			return ""
 		}
 		//机器人接龙到最后一个时重新初始化到第一句
-		if lyricsNO[i] == len(lyrics)-1 {
+		if lyricsNO[fromGroup] == len(lyrics)-1 {
 			defer func() {
-				lyricsNO[i] = 0
+				lyricsNO[fromGroup] = 0
 			}()
 		}
-		return lyrics[lyricsNO[i]]
+		return lyrics[lyricsNO[fromGroup]]
 	}
 	//重置接龙
 	if former == strings.ToLower(lyrics[0]) {
 		//		cqp.AddLog(cqp.Info, "Creeper", "重置接龙")
-		lyricsNO[i] = 1
+		lyricsNO[fromGroup] = 1
 		return lyrics[1]
 	}
 	return ""
