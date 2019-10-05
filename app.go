@@ -40,9 +40,7 @@ func talisman() {
 func getnext(former string, fromGroup int64) string {
 	//接不上来的时候可以复读让机器人接下一句
 	if former == strings.ToLower(lyrics[lyricsNO[fromGroup]]) {
-		//cqp.AddLog(cqp.Info, "Creeper", "群员复读")
 		lyricsNO[fromGroup]++
-		//cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		if lyricsNO[fromGroup] == len(lyrics)-1 {
 			defer func() {
 				lyricsNO[fromGroup] = 0
@@ -52,9 +50,7 @@ func getnext(former string, fromGroup int64) string {
 	}
 	//正常接龙
 	if former == strings.ToLower(lyrics[lyricsNO[fromGroup]+1]) {
-		//		cqp.AddLog(cqp.Info, "Creeper", "群员接龙")
 		lyricsNO[fromGroup] += 2
-		//		cqp.AddLog(cqp.Info, "Creeper", lyrics[lyricsNO[i]])
 		//群友接龙到末尾，重新初始化到第一句
 		if lyricsNO[fromGroup] >= len(lyrics) {
 			lyricsNO[fromGroup] = 0
@@ -70,7 +66,6 @@ func getnext(former string, fromGroup int64) string {
 	}
 	//重置接龙
 	if former == strings.ToLower(lyrics[0]) {
-		//		cqp.AddLog(cqp.Info, "Creeper", "重置接龙")
 		lyricsNO[fromGroup] = 1
 		return lyrics[1]
 	}
